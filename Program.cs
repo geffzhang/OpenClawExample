@@ -3,10 +3,10 @@ using OpenSandbox;
 using OpenSandbox.Config;
 using OpenSandbox.Models;
 
-const string server = "http://localhost:8080";
+const string server = "http://localhost:8090";
 const string image = "ghcr.io/openclaw/openclaw:latest";
 const int gatewayPort = 18789;
-const int timeoutSeconds = 3600;
+const int timeoutSeconds = 86400;
 
 var token = Environment.GetEnvironmentVariable("OPENCLAW_GATEWAY_TOKEN") ?? "dummy-token-for-sandbox";
 
@@ -16,35 +16,22 @@ await using var sandbox = await Sandbox.CreateAsync(new SandboxCreateOptions
 {
     Image = image,
     TimeoutSeconds = timeoutSeconds,
-    Metadata = new Dictionary<string, string>
-    {
-        ["example"] = "openclaw"
-    },
+    SkipHealthCheck = true,
     Entrypoint =
     [
-        "node dist/index.js gateway --bind=lan --port 18789 --allow-unconfigured --verbose"
+        "node dist/index.js gateway --port 18789 --allow-unconfigured --verbose"
     ],
-    ConnectionConfig = new ConnectionConfig(new ConnectionConfigOptions
-    {
-        Domain = server
-    }),
-    HealthCheck = CheckOpenClawAsync,
-    Env = new Dictionary<string, string>
-    {
-        ["OPENCLAW_GATEWAY_TOKEN"] = token
-    },
-    NetworkPolicy = new NetworkPolicy
-    {
-        DefaultAction = NetworkRuleAction.Deny,
-        Egress =
-        [
-            new NetworkRule
-            {
-                Action = NetworkRuleAction.Allow,
-                Target = "pypi.org"
-            }
-        ]
-    }
+    ConnectionConfig = new ConnectionConfig(new ConnectionConfigOptions { Domain = server }),
+    Env = new Dictionary<string, string> { ["OPENCLAW_GATEWAY_TOKEN"] = token },
+    Metadata = new Dictionary<string, string> { ["example"] = "openclaw" },
+    //NetworkPolicy = new NetworkPolicy { DefaultAction = NetworkRuleAction.Deny, Egress = [ new NetworkRule { Action = NetworkRuleAction.Allow, Target = "pypi.org" } ] }
+});
+
+await sandbox.WaitUntilReadyAsync(new WaitUntilReadyOptions
+{
+    ReadyTimeoutSeconds = timeoutSeconds,
+    PollingIntervalMillis = 200,
+    HealthCheck = CheckOpenClawAsync
 });
 
 var endpoint = await sandbox.GetEndpointAsync(gatewayPort);
