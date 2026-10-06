@@ -6,6 +6,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Alibaba.OpenSandbox" Version="0.1.0-alpha.3" />
+    <PackageReference Include="Alibaba.OpenSandbox" Version="1.1.0" />
   </ItemGroup>
 </Project>

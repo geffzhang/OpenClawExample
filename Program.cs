@@ -3,27 +3,34 @@ using OpenSandbox;
 using OpenSandbox.Config;
 using OpenSandbox.Models;
 
-const string server = "http://localhost:8090";
-const string image = "ghcr.io/openclaw/openclaw:latest";
+const string server = "https://sandbox.lab.csharpkit.com/";
+const string image = "ai4c-tcr.tencentcloudcr.com/agentfoundry/king-crab:opensandbox-202603271148";
 const int gatewayPort = 18789;
-const int timeoutSeconds = 86400;
+const int timeoutSeconds = 864000;
 
-var token = Environment.GetEnvironmentVariable("OPENCLAW_GATEWAY_TOKEN") ?? "dummy-token-for-sandbox";
+var token = Environment.GetEnvironmentVariable("OPENCLAW_GATEWAY_TOKEN") ?? "king-crab-demo-token";
 
 Console.WriteLine($"Creating openclaw sandbox with image={image} on OpenSandbox server {server}...");
 
+/// <summary>
+/// Default resource limits for sandbox containers.
+/// </summary>
+var DefaultResourceLimits = new Dictionary<string, string>
+{
+    ["cpu"] = "0.2",
+    ["memory"] = "128M"
+};
+
 await using var sandbox = await Sandbox.CreateAsync(new SandboxCreateOptions
 {
+    ManualCleanup = true,
     Image = image,
     TimeoutSeconds = timeoutSeconds,
-    SkipHealthCheck = true,
-    Entrypoint =
-    [
-        "node dist/index.js gateway --port 18789 --allow-unconfigured --verbose"
-    ],
-    ConnectionConfig = new ConnectionConfig(new ConnectionConfigOptions { Domain = server }),
+    SkipHealthCheck = true,   
+    ConnectionConfig = new ConnectionConfig(new ConnectionConfigOptions { Domain = server , ApiKey = "nKFk4hZugnwqeS0ckiY2e2K/RvuN6knnzsQ5vJLqzwc=" }),
     Env = new Dictionary<string, string> { ["OPENCLAW_GATEWAY_TOKEN"] = token },
-    Metadata = new Dictionary<string, string> { ["example"] = "openclaw" },
+    Metadata = new Dictionary<string, string> { ["example"] = "openclaw" }, 
+    Resource = DefaultResourceLimits,
     //NetworkPolicy = new NetworkPolicy { DefaultAction = NetworkRuleAction.Deny, Egress = [ new NetworkRule { Action = NetworkRuleAction.Allow, Target = "pypi.org" } ] }
 });
 

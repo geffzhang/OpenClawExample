@@ -7,13 +7,10 @@
 当前示例会：
 
 1. 连接本地 `OpenSandbox` 服务：`http://localhost:8090`
-2. 使用镜像：`ghcr.io/openclaw/openclaw:latest`
+2. 使用镜像：`ai4c-tcr.tencentcloudcr.com/agentfoundry/king-crab:opensandbox-202603271148`
 3. 启动 `OpenClaw` gateway
 4. 轮询沙箱公开端点，等待服务可用
 5. 输出可访问地址
-
-当前实现使用的启动命令：
-node dist/index.js gateway --port 18789 --allow-unconfigured --verbose
 
 ````````markdown
 > 说明：
